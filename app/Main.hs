@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Day1
+import Day2
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
@@ -44,6 +45,7 @@ usage = putStrLn "Usage: aoc day"
 
 _run :: (Eq a, Show a, Num a) => a -> Options -> IO ()
 _run 1 opts = Day1.run (optExample opts) >> exit
+_run 2 opts = Day2.run (optExample opts) >> exit
 _run day _ = putStrLn ("Day " ++ show day ++ " not implemented") >> exit
 
 exit :: IO a
