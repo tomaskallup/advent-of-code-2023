@@ -2,6 +2,7 @@ module Main (main) where
 
 import Day1
 import Day2
+import Day3
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
@@ -22,7 +23,7 @@ options =
   ]
 
 header :: String
-header = "Usage: aoc [OPTION...] day"
+header = "Usage: aoc [OPTIONS] day"
 
 compilerOpts :: [String] -> IO (Options, [String])
 compilerOpts argv =
@@ -41,11 +42,12 @@ parse [day] opts = _run (read day :: Integer) opts
 parse _ _ = usage >> exit
 
 usage :: IO ()
-usage = putStrLn "Usage: aoc day"
+usage = putStrLn header
 
 _run :: (Eq a, Show a, Num a) => a -> Options -> IO ()
 _run 1 opts = Day1.run (optExample opts) >> exit
 _run 2 opts = Day2.run (optExample opts) >> exit
+_run 3 opts = Day3.run (optExample opts) >> exit
 _run day _ = putStrLn ("Day " ++ show day ++ " not implemented") >> exit
 
 exit :: IO a
