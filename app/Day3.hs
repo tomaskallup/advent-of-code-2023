@@ -1,7 +1,8 @@
-module Day3 (run) where
+module Day3 (run, checkMultiplications, extractLine) where
 
 import Data.Char (isDigit)
 import Data.List
+import Data.Maybe (fromJust)
 
 getInput :: Bool -> IO String
 getInput True = readFile "inputs/day-3-example.txt"
@@ -48,9 +49,71 @@ sumValidNumbers content = _sumValidNumbers content content 0 0
 part1 :: Bool -> IO ()
 part1 example = do
   content <- getInput example
-  let a = sumValidNumbers (lines content) in putStrLn ("Part 1: " ++ show a)
+  putStrLn ("Part 1: " ++ show (sumValidNumbers (lines content)))
+
+withIndex :: [a] -> [(Int, a)]
+withIndex = zip [0 ..]
+
+countNumberCells :: (Bool, Bool, Bool) -> Int
+countNumberCells input = case input of
+  (False, False, False) -> 0
+  (True, False, True) -> 2
+  _ -> 1
+
+extractLine :: (Bool, Bool, Bool) -> Int -> String -> Int
+extractLine (True, True, True) x targetLine = read (left ++ right)
+  where
+    (leftPart, rightPart) = splitAt x targetLine
+    left = reverse $ takeWhile isDigit (reverse leftPart)
+    right = takeWhile isDigit rightPart
+extractLine (True, True, False) x targetLine = read $ reverse (takeWhile isDigit (reverse (take (x + 1) targetLine)))
+extractLine (True, False, False) x targetLine = read $ reverse (takeWhile isDigit (reverse (take x targetLine)))
+extractLine (False, True, True) x targetLine = read $ takeWhile isDigit (drop x targetLine)
+extractLine (False, False, True) x targetLine = read $ takeWhile isDigit (drop (x + 1) targetLine)
+extractLine (False, True, False) x targetLine = read [targetLine !! x]
+extractLine (True, False, True) x targetLine = read left * read right
+  where
+    (leftPart, rightPart) = splitAt x targetLine
+    left = reverse $ takeWhile isDigit (reverse leftPart)
+    right = takeWhile isDigit (drop 1 rightPart)
+extractLine _ _ _ = 0
+
+_extractNumberR :: String -> Int
+_extractNumberR content = read (reverse $ takeWhile isDigit content)
+
+_extractNumber :: String -> Int
+_extractNumber content = read (takeWhile isDigit content)
+
+_checkCellMultiplications :: (Maybe String, String, Maybe String) -> (Int, Char) -> Int -> Int
+_checkCellMultiplications (prevLine, line, nextLine) (x, '*') acc = case numberNeighbourCounts of
+  [2, 0, 0] -> acc + extractLine prevNeighbours x (fromJust prevLine)
+  [0, 2, 0] -> acc + extractLine lineNeighbours x line
+  [0, 0, 2] -> acc + extractLine nextNeighbours x (fromJust nextLine)
+  [1, 0, 1] -> acc + extractLine prevNeighbours x (fromJust prevLine) * extractLine nextNeighbours x (fromJust nextLine)
+  [1, 1, 0] -> acc + extractLine prevNeighbours x (fromJust prevLine) * extractLine lineNeighbours x line
+  [0, 1, 1] -> acc + extractLine nextNeighbours x (fromJust nextLine) * extractLine lineNeighbours x line
+  _ -> acc
+  where
+    getNeighbours targetLine = case targetLine of
+      Nothing -> (False, False, False)
+      Just l -> (maybe False isDigit (l !? (x - 1)), isDigit (l !! x), maybe False isDigit (l !? (x + 1)))
+    prevNeighbours = getNeighbours prevLine
+    nextNeighbours = getNeighbours nextLine
+    lineNeighbours = getNeighbours $ Just line
+    numberNeighbourCounts = [countNumberCells prevNeighbours, countNumberCells lineNeighbours, countNumberCells nextNeighbours]
+_checkCellMultiplications _ _ acc = acc
+
+_checkLineMultiplications :: (Maybe String, String, Maybe String) -> Int -> Int
+_checkLineMultiplications contentLines@(_, line, _) acc = foldl f acc (withIndex line)
+  where
+    f = flip (_checkCellMultiplications contentLines)
+
+checkMultiplications :: [String] -> Int
+checkMultiplications content = foldl f 0 (withIndex content)
+  where
+    f acc (index, line) = _checkLineMultiplications (content !? (index - 1), line, content !? (index + 1)) acc
 
 part2 :: Bool -> IO ()
 part2 example = do
   content <- getInput example
-  putStrLn ("Part 2: " ++ show content)
+  putStrLn ("Part 2: " ++ show (checkMultiplications $ lines content))

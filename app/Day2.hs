@@ -49,25 +49,25 @@ parseRounds line = _parseRounds line []
 
 _parseRounds :: String -> [[DiceRoll]] -> [[DiceRoll]]
 _parseRounds [] acc = reverse acc
-_parseRounds str acc = do
+_parseRounds str acc =
   let (rolls, rest) = _parseRound str []
-  _parseRounds rest (rolls : acc)
+   in _parseRounds rest (rolls : acc)
 
 _parseRound :: String -> [DiceRoll] -> ([DiceRoll], String)
 _parseRound [] rolls = (rolls, [])
 _parseRound str@(cs : rest) rolls
   | cs == ';' = (rolls, rest)
-  | otherwise = do
+  | otherwise =
       let (dice, rest2) = parseDice str
-      _parseRound rest2 (dice : rolls)
+       in _parseRound rest2 (dice : rolls)
 
 parseGame :: String -> Game
-parseGame line = do
+parseGame line =
   let (gameId, rest) = parseGameId line
-  Game
-    { gameId,
-      rounds = parseRounds rest
-    }
+   in Game
+        { gameId,
+          rounds = parseRounds rest
+        }
 
 parseGames :: String -> [Game]
 parseGames input = Prelude.map parseGame (lines input)
@@ -124,8 +124,10 @@ getMinPower :: Game -> Int
 getMinPower game = _getPower (_getMinForGame game)
 
 part2 :: Bool -> IO ()
-part2 example = do
-  content <- getInput example
+part2 example = getInput example >>= _part2
+
+_part2 :: String -> IO ()
+_part2 content =
   let games = parseGames content
-  let minPowers = map getMinPower games
-  putStrLn ("Part 2: " ++ show (sum minPowers))
+   in let minPowers = map getMinPower games
+       in putStrLn ("Part 2: " ++ show (sum minPowers))
