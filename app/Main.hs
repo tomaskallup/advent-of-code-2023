@@ -5,6 +5,7 @@ import Day2
 import Day3
 import Day4
 import Day5
+import Day6
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
@@ -52,6 +53,7 @@ _run 2 opts = Day2.run (optExample opts) >> exit
 _run 3 opts = Day3.run (optExample opts) >> exit
 _run 4 opts = Day4.run (optExample opts) >> exit
 _run 5 opts = Day5.run (optExample opts) >> exit
+_run 6 opts = Day6.run (optExample opts) >> exit
 _run day _ = putStrLn ("Day " ++ show day ++ " not implemented") >> exit
 
 exit :: IO a
