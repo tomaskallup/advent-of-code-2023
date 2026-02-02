@@ -25,6 +25,7 @@ executable advent-of-code2023
       Day4
       Day5
       Day6
+      Day7
     -- other-extensions:
     build-depends:    base ^>=4.21.0.0
     hs-source-dirs:   app
